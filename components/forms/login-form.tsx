@@ -14,12 +14,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { login } from "@/lib/api"
-
-const TOKEN_KEY = "fitness_tracker_token"
+import { login, TOKEN_KEY } from "@/lib/api"
+import { useAuth } from "@/lib/auth-context"
 
 export function LoginForm() {
   const router = useRouter()
+  const { setAuthenticated, setUser } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,9 +40,29 @@ export function LoginForm() {
     try {
       const response = await login({ username, password })
       if (response.token) {
+        console.log("[Login] Login exitoso", {
+          username: response.user?.username ?? username,
+          userId: response.user?.id,
+          role: response.user?.role,
+          hasMember: !!response.member,
+          hasTrainer: !!response.trainer,
+          expiresAt: response.expiresAt,
+        })
         if (typeof window !== "undefined") {
           localStorage.setItem(TOKEN_KEY, response.token)
+          if (response.user) {
+            const u = {
+              id: response.user.id,
+              username: response.user.username,
+              email: response.user.email,
+              role: response.user.role,
+              enabled: response.user.enabled,
+            }
+            localStorage.setItem("fitness_tracker_user", JSON.stringify(u))
+            setUser(u)
+          }
         }
+        setAuthenticated(true)
         router.push("/")
         router.refresh()
       } else {

@@ -5,6 +5,27 @@
 export const getApiUrl = () =>
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"
 
+/** Clave con la que se guarda el JWT en localStorage */
+export const TOKEN_KEY = "fitness_tracker_token"
+
+/** Devuelve el token guardado (solo en el cliente). */
+export function getToken(): string | null {
+  if (typeof window === "undefined") return null
+  return localStorage.getItem(TOKEN_KEY)
+}
+
+export async function fetchWithAuth(
+  path: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const url = `${getApiUrl()}${path.startsWith("/") ? path : `/${path}`}`
+  const token = getToken()
+  const headers = new Headers(options.headers)
+  headers.set("Content-Type", "application/json")
+  if (token) headers.set("Authorization", `Bearer ${token}`)
+  return fetch(url, { ...options, headers })
+}
+
 export type AuthResponse = {
   token: string
   type?: string
