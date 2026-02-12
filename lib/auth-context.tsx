@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getToken, TOKEN_KEY } from "@/lib/api"
+import { getToken, TOKEN_KEY } from "@/lib/api-client"
 
 /** Usuario logueado; coincide con lo que devuelve el backend en AuthResponse.user */
 export interface User {

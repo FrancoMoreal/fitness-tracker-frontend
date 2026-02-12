@@ -14,8 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { login, TOKEN_KEY } from "@/lib/api"
+import { TOKEN_KEY } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
+import { authService } from "@/services/auth.service"
+
 
 export function LoginForm() {
   const router = useRouter()
@@ -26,56 +28,76 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
+  
     const form = e.currentTarget
     const formData = new FormData(form)
     const username = (formData.get("username") as string)?.trim()
     const password = formData.get("password") as string
-
+  
     if (!username || !password) {
       setError("Usuario y contraseña son requeridos.")
       return
     }
-
+  
     setIsLoading(true)
+  
     try {
-      const response = await login({ username, password })
-      if (response.token) {
-        console.log("[Login] Login exitoso", {
-          username: response.user?.username ?? username,
-          userId: response.user?.id,
-          role: response.user?.role,
-          hasMember: !!response.member,
-          hasTrainer: !!response.trainer,
-          expiresAt: response.expiresAt,
-        })
-        if (typeof window !== "undefined") {
-          localStorage.setItem(TOKEN_KEY, response.token)
-          if (response.user) {
-            const u = {
-              id: response.user.id,
-              username: response.user.username,
-              email: response.user.email,
-              role: response.user.role,
-              enabled: response.user.enabled,
-            }
-            localStorage.setItem("fitness_tracker_user", JSON.stringify(u))
-            setUser(u)
-          }
-        }
-        setAuthenticated(true)
-        router.push("/")
-        router.refresh()
-      } else {
-        setError("No se recibió token del servidor.")
+      const response = await authService.login({ username, password })
+  
+      // Error de API (credenciales, 401, etc)
+      if (!response.success) {
+        setError(response.error || "Error al iniciar sesión.")
+        return
       }
+  
+      const authData = response.data
+  
+      if (!authData?.token) {
+        setError("No se recibió token del servidor.")
+        return
+      }
+  
+      console.log("[Login] Login exitoso", {
+        username: authData.user?.username ?? username,
+        userId: authData.user?.id,
+        role: authData.user?.role,
+        hasMember: !!authData.member,
+        hasTrainer: !!authData.trainer,
+        expiresAt: authData.expiresAt,
+      })
+  
+      // El token YA fue guardado por authService.saveToken()
+      if (typeof window !== "undefined") {
+        if (authData.user) {
+          const u = {
+            id: authData.user.id,
+            username: authData.user.username,
+            email: authData.user.email,
+            role: authData.user.role,
+            enabled: authData.user.enabled,
+          }
+  
+          localStorage.setItem("fitness_tracker_user", JSON.stringify(u))
+          setUser(u)
+        }
+      }
+  
+      setAuthenticated(true)
+      router.push("/")
+      router.refresh()
+  
     } catch (err) {
+      console.error(err)
       const message =
-        err instanceof Error ? err.message : "Error al iniciar sesión. Revisá usuario y contraseña."
+        err instanceof Error
+          ? err.message
+          : "Error al iniciar sesión. Revisá usuario y contraseña."
       setError(message)
     } finally {
       setIsLoading(false)
     }
   }
+  
 
   return (
     <Card className="mx-auto w-full max-w-sm border bg-card text-card-foreground shadow-lg">

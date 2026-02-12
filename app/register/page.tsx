@@ -31,7 +31,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { MemberRegistrationData, TrainerRegistrationData } from "@/types/register.types"
-import registerService from "@/services/register.service"
+import registerService from "@/services/auth.service"
 
 type UserType = "member" | "trainer" | null
 
