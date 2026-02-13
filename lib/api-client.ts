@@ -1,9 +1,3 @@
-// lib/api-client.ts
-
-/**
- * URL base del backend. En desarrollo usa localhost:8080 si no está definida.
- * Crea .env.local con: NEXT_PUBLIC_API_URL=http://localhost:8080
- */
 export const getApiUrl = () =>
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"
 
