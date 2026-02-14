@@ -1,6 +1,4 @@
-import { api, TOKEN_KEY } from "../lib/api-client"
-
-import type { ApiResponse } from "../lib/api-client"
+import { api, TOKEN_KEY, type ApiResponse } from "@/lib/api-client"
 import type {
   MemberRegistrationData,
   TrainerRegistrationData,
@@ -61,11 +59,14 @@ export const authService = {
     }
 
     const token = response.data?.token
+    const user = response.data?.user
 
     if (token) {
       this.saveToken(token)
+      if (user) {
+        this.saveUser(user)
+      }
     } else {
-      // backend no devuelve token
       return {
         success: false,
         error: "Respuesta inválida del servidor (sin token)",
@@ -82,6 +83,7 @@ export const authService = {
   logout(): void {
     if (typeof window !== "undefined") {
       localStorage.removeItem(TOKEN_KEY)
+      localStorage.removeItem("fitness_tracker_user")
     }
   },
 
@@ -93,7 +95,21 @@ export const authService = {
       localStorage.setItem(TOKEN_KEY, token)
     }
   },
-
+  saveUser(user: any): void {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("fitness_tracker_user", JSON.stringify(user))
+    }
+  },
+  getStoredUser(): any | null {
+    if (typeof window === "undefined") return null
+    try {
+      const raw = localStorage.getItem("fitness_tracker_user")
+      if (!raw) return null
+      return JSON.parse(raw)
+    } catch {
+      return null
+    }
+  },
   /**
    * Verificar si el usuario está autenticado
    */
@@ -106,8 +122,8 @@ export const authService = {
 
   async registerMember(
     data: MemberRegistrationData
-  ): Promise<ApiResponse<RegisterResponse>> {
-    return api.post<RegisterResponse>(
+  ): Promise<ApiResponse<AuthResponse>> { 
+    return api.post<AuthResponse>(
       "/auth/register/member",
       {
         username: data.username,
@@ -121,10 +137,11 @@ export const authService = {
       { skipAuth: true }
     )
   },
+  
   async registerTrainer(
     data: TrainerRegistrationData
-  ): Promise<ApiResponse<RegisterResponse>> {
-    return api.post<RegisterResponse>(
+  ): Promise<ApiResponse<AuthResponse>> { 
+    return api.post<AuthResponse>(
       "/auth/register/trainer",
       {
         username: data.username,
