@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card } from "@/components/ui/card"
+import authService from "@/services/auth.service"
 import {
   InputGroup,
   InputGroupAddon,
@@ -32,6 +33,8 @@ import {
 import { cn } from "@/lib/utils"
 import type { MemberRegistrationData, TrainerRegistrationData } from "@/types/register.types"
 import registerService from "@/services/auth.service"
+import { useAuth } from "@/lib/auth-context"
+
 
 type UserType = "member" | "trainer" | null
 
@@ -64,6 +67,7 @@ const initialFormData: FormData = {
 }
 
 export default function RegisterPage() {
+  const { setAuthenticated, setUser } = useAuth()
   const router = useRouter()
   const [userType, setUserTypeState] = useState<UserType>(null)
   const [formData, setFormData] = useState<FormData>(initialFormData)
@@ -153,6 +157,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log("[Register] Submit del formulario", { userType })
+    
     if (!validateForm()) {
       console.warn("[Register] Validación fallida, no se envía")
       toast.error("Error de validación", {
@@ -160,10 +165,13 @@ export default function RegisterPage() {
       })
       return
     }
-
+  
     setLoading(true)
     console.log("[Register] Iniciando registro...")
+    
     try {
+      let response
+  
       if (userType === "member") {
         console.log("[Register] Procesando registro de miembro")
         const data: MemberRegistrationData = {
@@ -175,19 +183,8 @@ export default function RegisterPage() {
           phone: formData.phone.trim(),
           dateOfBirth: formData.dateOfBirth,
         }
-        const response = await registerService.registerMember(data)
-        if (response.success) {
-          console.log("[Register] Registro de miembro exitoso, redirigiendo a login")
-          toast.success("¡Registro exitoso!", {
-            description: "Tu cuenta ha sido creada. Redirigiendo...",
-          })
-          setTimeout(() => router.push("/login"), 1500)
-        } else {
-          console.error("[Register] Error en registro de miembro:", response.error)
-          toast.error("Error en el registro", {
-            description: response.error ?? "Intenta de nuevo.",
-          })
-        }
+        response = await authService.registerMember(data)
+        
       } else if (userType === "trainer") {
         console.log("[Register] Procesando registro de entrenador")
         const certifications = formData.certificationsText
@@ -195,6 +192,7 @@ export default function RegisterPage() {
           .map((s) => s.trim())
           .filter(Boolean)
         console.log("[Register] Certificaciones procesadas:", certifications)
+        
         const data: TrainerRegistrationData = {
           username: formData.username.trim(),
           email: formData.email.trim(),
@@ -205,20 +203,38 @@ export default function RegisterPage() {
           certifications,
           hourlyRate: parseFloat(formData.hourlyRate),
         }
-        const response = await registerService.registerTrainer(data)
-        if (response.success) {
-          console.log("[Register] Registro de entrenador exitoso, redirigiendo a login")
-          toast.success("¡Registro exitoso!", {
-            description: "Tu cuenta ha sido creada. Redirigiendo...",
-          })
-          setTimeout(() => router.push("/login"), 1500)
-        } else {
-          console.error("[Register] Error en registro de entrenador:", response.error)
-          toast.error("Error en el registro", {
-            description: response.error ?? "Intenta de nuevo.",
-          })
-        }
+        response = await authService.registerTrainer(data)
       }
+  
+  
+      if (response?.success && response.data?.token) {
+        console.log("[Register] Registro exitoso con token, guardando sesión")
+        
+      
+        authService.saveToken(response.data.token)
+        if (response.data.user) {
+          authService.saveUser(response.data.user)
+        }
+        
+        
+        setAuthenticated(true)
+        if (response.data.user) {
+          setUser(response.data.user)
+        }
+        
+        toast.success("¡Registro exitoso!", {
+          description: "Redirigiendo al perfil...",
+        })
+        
+        setTimeout(() => router.push("/profile"), 1000)
+        
+      } else {
+        console.error("[Register] Error en registro:", response?.error)
+        toast.error("Error en el registro", {
+          description: response?.error ?? "Intenta de nuevo.",
+        })
+      }
+      
     } catch (err) {
       console.error("[Register] Excepción inesperada:", err)
       toast.error("Error", {
