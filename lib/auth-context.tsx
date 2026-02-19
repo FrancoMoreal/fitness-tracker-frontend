@@ -1,10 +1,9 @@
 "use client"
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react"
+import { createContext, useCallback, useContext, useReducer } from "react"
 import { useRouter } from "next/navigation"
 import { getToken, TOKEN_KEY } from "@/lib/api-client"
 
-/** Usuario logueado; coincide con lo que devuelve el backend en AuthResponse.user */
 export interface User {
   id: number
   username: string
@@ -13,11 +12,13 @@ export interface User {
   enabled?: boolean
 }
 
-type AuthContextValue = {
+type AuthState = {
   isAuthenticated: boolean
   user: User | null
-  setAuthenticated: (value: boolean) => void
-  setUser: (user: User | null) => void
+}
+
+type AuthContextValue = AuthState & {
+  login: (user: User) => void
   logout: () => void
 }
 
@@ -34,18 +35,27 @@ function getStoredUser(): User | null {
   }
 }
 
+function initAuthState(): AuthState {
+  if (typeof window === "undefined") return { isAuthenticated: false, user: null }
+  const token = getToken()
+  return {
+    isAuthenticated: !!token,
+    user: token ? getStoredUser() : null,
+  }
+}
+
+function authReducer(state: AuthState, partial: Partial<AuthState>): AuthState {
+  return { ...state, ...partial }
+}
+
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const [isAuthenticated, setAuthenticated] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
+  const [{ isAuthenticated, user }, dispatch] = useReducer(authReducer, null, initAuthState)
 
-  useEffect(() => {
-    const token = getToken()
-    setAuthenticated(!!token)
-    if (token) setUser(getStoredUser())
-    else setUser(null)
+  const login = useCallback((user: User) => {
+    dispatch({ isAuthenticated: true, user })
   }, [])
 
   const logout = useCallback(() => {
@@ -53,15 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(USER_KEY)
     }
-    setAuthenticated(false)
-    setUser(null)
+    dispatch({ isAuthenticated: false, user: null })
     console.log("[Auth] Usuario cerró sesión")
     router.push("/login")
-    router.refresh()
   }, [router])
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, setAuthenticated, setUser, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

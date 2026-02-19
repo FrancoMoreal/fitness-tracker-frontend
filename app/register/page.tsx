@@ -67,7 +67,7 @@ const initialFormData: FormData = {
 }
 
 export default function RegisterPage() {
-  const { setAuthenticated, setUser } = useAuth()
+  const { login } = useAuth()
   const router = useRouter()
   const [userType, setUserTypeState] = useState<UserType>(null)
   const [formData, setFormData] = useState<FormData>(initialFormData)
@@ -207,26 +207,16 @@ export default function RegisterPage() {
       }
   
   
-      if (response?.success && response.data?.token) {
+      if (response?.success && response.data?.token && response.data?.user) {
         console.log("[Register] Registro exitoso con token, guardando sesión")
         
       
-        authService.saveToken(response.data.token)
-        if (response.data.user) {
-          authService.saveUser(response.data.user)
-        }
-        
-        
-        setAuthenticated(true)
-        if (response.data.user) {
-          setUser(response.data.user)
-        }
-        
+        login(response.data.user) // una sola llamada atómica
+
         toast.success("¡Registro exitoso!", {
           description: "Redirigiendo al perfil...",
+          onAutoClose: () => router.push("/profile"), // se ejecuta cuando el toast desaparece
         })
-        
-        setTimeout(() => router.push("/profile"), 1000)
         
       } else {
         console.error("[Register] Error en registro:", response?.error)
