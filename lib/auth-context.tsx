@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react"
+import { createContext, useCallback, useContext, useState } from "react"
 import { useRouter } from "next/navigation"
 import { getToken, TOKEN_KEY } from "@/lib/api-client"
 
@@ -38,15 +38,16 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const [isAuthenticated, setAuthenticated] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
 
-  useEffect(() => {
+  const [isAuthenticated, setAuthenticated] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false
+    return !!getToken()
+  })
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window === "undefined") return null
     const token = getToken()
-    setAuthenticated(!!token)
-    if (token) setUser(getStoredUser())
-    else setUser(null)
-  }, [])
+    return token ? getStoredUser() : null
+  })
 
   const logout = useCallback(() => {
     if (typeof window !== "undefined") {
