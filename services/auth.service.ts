@@ -43,7 +43,7 @@ export interface PasswordValidation {
 
 // SERVICIO DE AUTENTICACIÓN
 
-export const authService = {
+export const AuthService = {
   async login(
     credentials: LoginCredentials
   ): Promise<ApiResponse<AuthResponse>> {
@@ -76,10 +76,6 @@ export const authService = {
     return response
   },
 
-
-  /**
-   * Cerrar sesión
-   */
   logout(): void {
     if (typeof window !== "undefined") {
       localStorage.removeItem(TOKEN_KEY)
@@ -110,9 +106,7 @@ export const authService = {
       return null
     }
   },
-  /**
-   * Verificar si el usuario está autenticado
-   */
+
   isAuthenticated(): boolean {
     if (typeof window === "undefined") return false
     return !!localStorage.getItem(TOKEN_KEY)
@@ -212,9 +206,7 @@ export const authService = {
     )
   },
 
-  /**
-   * Resetear contraseña con token
-   */
+
   async resetPassword(
     token: string,
     newPassword: string
@@ -242,9 +234,7 @@ export const authService = {
     return response
   },
 
-  /**
-   * Verificar email (confirmación de cuenta)
-   */
+  
   async verifyEmail(token: string): Promise<ApiResponse> {
     return api.post(
       "/auth/verify-email",
@@ -254,4 +244,6 @@ export const authService = {
   },
 }
 
-export default authService
+export default AuthService
+
+

@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useReducer } from "react"
 import { useRouter } from "next/navigation"
 import { getToken, TOKEN_KEY } from "@/lib/api-client"
-
+import { Paths } from "@/lib/paths"
 export interface User {
   id: number
   username: string
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     dispatch({ isAuthenticated: false, user: null })
     console.log("[Auth] Usuario cerró sesión")
-    router.push("/login")
+    router.push(Paths.LOGIN)
   }, [router])
 
   return (
