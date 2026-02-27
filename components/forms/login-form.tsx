@@ -62,8 +62,6 @@ export function LoginForm() {
       })
 
       // login() actualiza el contexto
-      AuthService.saveToken(authData.token)
-      AuthService.saveUser(authData.user)
       login(authData.user)
 
       router.push(Paths.HOME)
