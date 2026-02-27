@@ -42,21 +42,11 @@ export const AuthService = {
 
   // SESIÓN
 
-  async login(credentials: LoginCredentials): Promise<ApiResponse<AuthResponse>> {
+  async login(credentials: LoginCredentials) {
     const response = await api.post<AuthResponse>("/auth/login", credentials, { skipAuth: true })
-
     if (!response.success) return response
-
-    const { token, user } = response.data ?? {}
-
-    if (!token) {
-      return { success: false, error: "Respuesta inválida del servidor (sin token)" }
-    }
-
-    //  Delega la persistencia a storage
-    storage.setToken(token)
-    if (user) storage.setUser(user)
-
+    if (!response.data?.token) return { success: false, error: "Sin token" }
+    persistSession(response) // ✅
     return response
   },
 
@@ -71,31 +61,17 @@ export const AuthService = {
 
   // REGISTRO
 
-  async registerMember(data: MemberRegistrationData): Promise<ApiResponse<AuthResponse>> {
-    return api.post<AuthResponse>("/auth/register/member", {
-      username:    data.username,
-      email:       data.email,
-      password:    data.password,
-      firstName:   data.firstName,
-      lastName:    data.lastName,
-      phone:       data.phone,
-      dateOfBirth: data.dateOfBirth,
-    }, { skipAuth: true })
+  async registerMember(data: MemberRegistrationData) {
+    const response = await api.post<AuthResponse>("/auth/register/member", { ...data }, { skipAuth: true })
+    persistSession(response) // ✅
+    return response
   },
 
-  async registerTrainer(data: TrainerRegistrationData): Promise<ApiResponse<AuthResponse>> {
-    return api.post<AuthResponse>("/auth/register/trainer", {
-      username:       data.username,
-      email:          data.email,
-      password:       data.password,
-      firstName:      data.firstName,
-      lastName:       data.lastName,
-      specialty:      data.specialty,
-      certifications: data.certifications,
-      hourlyRate:     data.hourlyRate,
-    }, { skipAuth: true })
+  async registerTrainer(data: TrainerRegistrationData) {
+    const response = await api.post<AuthResponse>("/auth/register/trainer", { ...data }, { skipAuth: true })
+    persistSession(response) // ✅
+    return response
   },
-
   async checkUsernameExists(username: string): Promise<boolean> {
     const response = await api.get<{ exists: boolean }>(
       `/auth/check-username?username=${encodeURIComponent(username)}`,
@@ -155,3 +131,10 @@ export const AuthService = {
 }
 
 export default AuthService
+
+function persistSession(response: ApiResponse<AuthResponse>): void {
+  if (response.success && response.data?.token) {
+    storage.setToken(response.data.token)
+    if (response.data.user) storage.setUser(response.data.user)
+  }
+}

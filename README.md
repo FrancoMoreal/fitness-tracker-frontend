@@ -98,7 +98,7 @@ frontend/
 ## ⚙️ Instalación y ejecución
 
 ```
-git clone https://github.com/tu-usuario/fitness-tracker-frontend.git
+git clone https://github.com/FrancoMoreal/fitness-tracker-frontend.git
 cd fitness-tracker/frontend
 npm install
 npm run dev
