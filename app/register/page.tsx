@@ -274,7 +274,7 @@ validateUsername(formData.username, newErrors, userType)
           <p className="text-muted-foreground">Elige tu perfil y comienza</p>
         </div>
 
-        {!userType ? (
+        {userType === null ?(
           <div className="w-full max-w-4xl">
             <div className="grid gap-6 md:grid-cols-2">
               <Card

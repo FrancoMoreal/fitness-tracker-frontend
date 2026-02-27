@@ -2,8 +2,9 @@
 
 import { createContext, useCallback, useContext, useReducer } from "react"
 import { useRouter } from "next/navigation"
-import { getToken, TOKEN_KEY } from "@/lib/api-client"
+import { storage } from "@/lib/storage"
 import { Paths } from "@/lib/paths"
+
 export interface User {
   id: number
   username: string
@@ -22,25 +23,11 @@ type AuthContextValue = AuthState & {
   logout: () => void
 }
 
-const USER_KEY = "fitness_tracker_user"
-
-function getStoredUser(): User | null {
-  if (typeof window === "undefined") return null
-  try {
-    const raw = localStorage.getItem(USER_KEY)
-    if (!raw) return null
-    return JSON.parse(raw) as User
-  } catch {
-    return null
-  }
-}
-
 function initAuthState(): AuthState {
-  if (typeof window === "undefined") return { isAuthenticated: false, user: null }
-  const token = getToken()
+  const token = storage.getToken()
   return {
     isAuthenticated: !!token,
-    user: token ? getStoredUser() : null,
+    user: token ? storage.getUser<User>() : null,
   }
 }
 
@@ -59,10 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const logout = useCallback(() => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(USER_KEY)
-    }
+    storage.clearSession() // una sola llamada
     dispatch({ isAuthenticated: false, user: null })
     console.log("[Auth] Usuario cerró sesión")
     router.push(Paths.LOGIN)
