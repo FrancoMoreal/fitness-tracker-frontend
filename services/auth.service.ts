@@ -1,5 +1,4 @@
 import { api, type ApiResponse } from "@/lib/api-client"
-import { storage } from "@/lib/storage"
 import type {
   MemberRegistrationData,
   TrainerRegistrationData,
@@ -18,19 +17,11 @@ export interface AuthResponse {
     username: string
     email?: string
     role?: string
+    userType?: string   
     enabled?: boolean
   }
   member?: unknown
   trainer?: unknown
-  expiresAt?: string
-  refreshToken?: string
-}
-
-export interface RegisterResponse {
-  id: number
-  username: string
-  email: string
-  role: string
 }
 
 export interface PasswordValidation {
@@ -40,38 +31,22 @@ export interface PasswordValidation {
 
 export const AuthService = {
 
-  // SESIÓN
 
   async login(credentials: LoginCredentials) {
-    const response = await api.post<AuthResponse>("/auth/login", credentials, { skipAuth: true })
-    if (!response.success) return response
-    if (!response.data?.token) return { success: false, error: "Sin token" }
-    persistSession(response) // ✅
-    return response
+    return api.post<AuthResponse>("/auth/login", credentials, { skipAuth: true })
   },
 
-  logout(): void {
-    storage.clearSession() // una sola llamada
-  },
-
-  isAuthenticated(): boolean {
-    return !!storage.getToken()
-  },
-
-
-  // REGISTRO
 
   async registerMember(data: MemberRegistrationData) {
-    const response = await api.post<AuthResponse>("/auth/register/member", { ...data }, { skipAuth: true })
-    persistSession(response) // ✅
-    return response
+    return api.post<AuthResponse>("/auth/register/member", { ...data }, { skipAuth: true })
   },
 
   async registerTrainer(data: TrainerRegistrationData) {
-    const response = await api.post<AuthResponse>("/auth/register/trainer", { ...data }, { skipAuth: true })
-    persistSession(response) // ✅
-    return response
+    return api.post<AuthResponse>("/auth/register/trainer", { ...data }, { skipAuth: true })
   },
+
+  // ── Validaciones  ────────────────────────────────────────
+
   async checkUsernameExists(username: string): Promise<boolean> {
     const response = await api.get<{ exists: boolean }>(
       `/auth/check-username?username=${encodeURIComponent(username)}`,
@@ -88,14 +63,14 @@ export const AuthService = {
     return response.data?.exists ?? false
   },
 
-  // CONTRASEÑAS
+  // ── Contraseñas ───────────────────────────────────────────────────────────
 
   validatePassword(password: string): PasswordValidation {
-    if (password.length < 8)          return { valid: false, message: "Mínimo 8 caracteres" }
-    if (!/[A-Z]/.test(password))      return { valid: false, message: "Al menos una mayúscula" }
-    if (!/[a-z]/.test(password))      return { valid: false, message: "Al menos una minúscula" }
-    if (!/[0-9]/.test(password))      return { valid: false, message: "Al menos un número" }
-    if (!/[@$!%*?&]/.test(password))  return { valid: false, message: "Al menos un carácter especial (@$!%*?&)" }
+    if (password.length < 8)         return { valid: false, message: "Mínimo 8 caracteres" }
+    if (!/[A-Z]/.test(password))     return { valid: false, message: "Al menos una mayúscula" }
+    if (!/[a-z]/.test(password))     return { valid: false, message: "Al menos una minúscula" }
+    if (!/[0-9]/.test(password))     return { valid: false, message: "Al menos un número" }
+    if (!/[@$!%*?&]/.test(password)) return { valid: false, message: "Al menos un carácter especial (@$!%*?&)" }
     return { valid: true }
   },
 
@@ -111,30 +86,9 @@ export const AuthService = {
     return api.post("/auth/reset-password", { token, newPassword }, { skipAuth: true })
   },
 
-  // TOKENS
-
-  async refreshToken(refreshToken: string): Promise<ApiResponse<AuthResponse>> {
-    const response = await api.post<AuthResponse>(
-      "/auth/refresh",
-      { refreshToken },
-      { skipAuth: true }
-    )
-    if (response.success && response.data?.token) {
-      storage.setToken(response.data.token) // ✅
-    }
-    return response
-  },
-
   async verifyEmail(token: string): Promise<ApiResponse> {
     return api.post("/auth/verify-email", { token }, { skipAuth: true })
   },
 }
 
 export default AuthService
-
-function persistSession(response: ApiResponse<AuthResponse>): void {
-  if (response.success && response.data?.token) {
-    storage.setToken(response.data.token)
-    if (response.data.user) storage.setUser(response.data.user)
-  }
-}

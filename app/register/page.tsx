@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import AuthService from "@/services/auth.service";
@@ -35,9 +34,8 @@ import type {
   MemberRegistrationData,
   TrainerRegistrationData,
 } from "@/types/register.types";
-import registerService from "@/services/auth.service";
 import { useAuth } from "@/lib/auth-context";
-import { Paths } from "@/lib/paths"
+import { Paths } from "@/lib/paths";
 
 enum UserEnum {
   MEMBER,
@@ -105,7 +103,7 @@ export default function RegisterPage() {
     });
     const newErrors: Record<string, string> = {};
 
-validateUsername(formData.username, newErrors, userType)
+  validateUsername(formData.username, newErrors, userType);
 
     if (!formData.firstName.trim())
       newErrors.firstName = "El nombre es requerido";
@@ -126,7 +124,7 @@ validateUsername(formData.username, newErrors, userType)
     if (!formData.dateOfBirth)
       newErrors.dateOfBirth = "La fecha de nacimiento es requerida";
 
-    const pwdValidation = registerService.validatePassword(formData.password);
+    const pwdValidation = AuthService.validatePassword(formData.password);
     if (!pwdValidation.valid) {
       newErrors.password = pwdValidation.message ?? "Contraseña inválida";
     }
@@ -274,15 +272,17 @@ validateUsername(formData.username, newErrors, userType)
           <p className="text-muted-foreground">Elige tu perfil y comienza</p>
         </div>
 
-        {userType === null ?(
-          <div className="w-full max-w-4xl">
-            <div className="grid gap-6 md:grid-cols-2">
+        {userType === null ? (
+          <div className="mx-auto w-full max-w-3xl">
+            <div className="mx-auto grid w-full max-w-2xl gap-6 md:grid-cols-2">
               <Card
-                className="group relative cursor-pointer overflow-hidden border-2 p-8 transition-all hover:border-primary hover:shadow-xl"
+                className="group relative cursor-pointer overflow-hidden border-2 p-0 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-primary/5 hover:ring-2 hover:ring-primary/40 hover:shadow-2xl hover:shadow-primary/30"
                 onClick={() => setUserType(UserEnum.MEMBER)}
               >
                 <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 transition-transform group-hover:scale-150" />
-                <div className="relative">
+                <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-primary/15 blur-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative pl-12 pr-10 pt-8 pb-12">
                   <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
                     <User className="h-8 w-8" />
                   </div>
@@ -306,11 +306,13 @@ validateUsername(formData.username, newErrors, userType)
               </Card>
 
               <Card
-                className="group relative cursor-pointer overflow-hidden border-2 p-8 transition-all hover:border-primary hover:shadow-xl"
+                className="group relative cursor-pointer overflow-hidden border-2 p-0 transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:bg-primary/5 hover:ring-2 hover:ring-primary/40 hover:shadow-2xl hover:shadow-primary/30"
                 onClick={() => setUserType(UserEnum.TRAINER)}
               >
                 <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 transition-transform group-hover:scale-150" />
-                <div className="relative">
+                <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-primary/15 blur-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-primary/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <div className="relative pl-12 pr-10 pt-8 pb-12">
                   <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
                     <Dumbbell className="h-8 w-8" />
                   </div>
