@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,16 +18,17 @@ import { cn } from "@/lib/utils"
 
 export function Navbar() {
   const { isAuthenticated, logout, user } = useAuth()
+  const [mounted, setMounted] = useState(false)
 
-  // Iniciales para el avatar: username (ej. "juan_doe" -> "JD") o primeras 2 letras
+  // Solo después del primer render en el cliente sabemos el estado real de auth
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const getUserInitials = () => {
     if (!user?.username) return "U"
     const u = user.username.replace(/_/g, " ").split(" ")
-    return u
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
+    return u.map((n) => n[0]).join("").toUpperCase().slice(0, 2)
   }
 
   return (
@@ -49,7 +51,9 @@ export function Navbar() {
 
         {/* Navigation */}
         <nav className="flex items-center gap-2" aria-label="Navegación principal">
-          {isAuthenticated ? (
+          {!mounted ? (
+            <div className="h-9 w-9" />
+          ) : isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

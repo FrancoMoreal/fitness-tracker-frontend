@@ -14,90 +14,69 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { TOKEN_KEY } from "@/lib/api-client"
 import { useAuth } from "@/lib/auth-context"
-import { authService } from "@/services/auth.service"
-
+import { AuthService } from "@/services/auth.service"
+import { Paths } from "@/lib/paths"
 
 export function LoginForm() {
   const router = useRouter()
-  const { setAuthenticated, setUser } = useAuth()
+  const { login } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
-  
+
     const form = e.currentTarget
     const formData = new FormData(form)
     const username = (formData.get("username") as string)?.trim()
     const password = formData.get("password") as string
-  
+
     if (!username || !password) {
       setError("Usuario y contraseña son requeridos.")
       return
     }
-  
+
     setIsLoading(true)
-  
+
     try {
-      const response = await authService.login({ username, password })
-  
-      // Error de API (credenciales, 401, etc)
+      const response = await AuthService.login({ username, password })
+
       if (!response.success) {
         setError(response.error || "Error al iniciar sesión.")
         return
       }
-  
+
       const authData = response.data
-  
-      if (!authData?.token) {
-        setError("No se recibió token del servidor.")
+
+      if (!authData?.token || !authData?.user) {
+        setError("Respuesta inválida del servidor.")
         return
       }
-  
+
       console.log("[Login] Login exitoso", {
-        username: authData.user?.username ?? username,
-        userId: authData.user?.id,
-        role: authData.user?.role,
-        hasMember: !!authData.member,
-        hasTrainer: !!authData.trainer,
-        expiresAt: authData.expiresAt,
+        username: authData.user.username,
+        userId: authData.user.id,
+        role: authData.user.role,
       })
-  
-      // El token YA fue guardado por authService.saveToken()
-      if (typeof window !== "undefined") {
-        if (authData.user) {
-          const u = {
-            id: authData.user.id,
-            username: authData.user.username,
-            email: authData.user.email,
-            role: authData.user.role,
-            enabled: authData.user.enabled,
-          }
-  
-          localStorage.setItem("fitness_tracker_user", JSON.stringify(u))
-          setUser(u)
-        }
-      }
-  
-      setAuthenticated(true)
-      router.push("/")
-      router.refresh()
-  
+
+      // login() actualiza el contexto
+      login(authData.user)
+
+      router.push(Paths.HOME)
+
     } catch (err) {
       console.error(err)
-      const message =
+      setError(
         err instanceof Error
           ? err.message
           : "Error al iniciar sesión. Revisá usuario y contraseña."
-      setError(message)
+      )
     } finally {
       setIsLoading(false)
     }
   }
-  
 
   return (
     <Card className="mx-auto w-full max-w-sm border bg-card text-card-foreground shadow-lg">
