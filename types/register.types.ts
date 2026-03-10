@@ -19,6 +19,8 @@ export interface TrainerRegistrationData {
   firstName: string
   lastName: string
   specialty: string
+  dateOfBirth: string // YYYY-MM-DD
+  phone: string
   certifications: string[] // al menos una
   hourlyRate: number
 }

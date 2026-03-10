@@ -5,10 +5,9 @@ import { cn } from "@/lib/utils"
 
 const COOKIE_NAME = "fitness_tracker_token"
 
-/**
- * Decodifica el payload de un JWT sin verificar firma.
- * Solo se usa para leer claims en el servidor — la firma se valida en el backend.
- */
+
+ // Solo se usa para leer claims en el servidor — la firma se valida en el backend.
+
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
     const parts = token.split(".")
@@ -27,11 +26,6 @@ function isTokenExpired(payload: Record<string, unknown>): boolean {
   return Date.now() >= payload.exp * 1000
 }
 
-/**
- * Navbar como Server Component.
- * Lee la cookie HttpOnly en el servidor → el HTML inicial ya tiene el estado
- * correcto → React no detecta diferencias → cero hydration mismatch.
- */
 export async function Navbar({ className }: { className?: string }) {
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE_NAME)?.value
