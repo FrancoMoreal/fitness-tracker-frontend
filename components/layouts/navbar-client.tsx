@@ -15,7 +15,6 @@ import { User, Settings, LogOut } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 interface NavbarClientProps {
-  /** Usuario pre-resuelto desde el servidor via cookie */
   initialUser: {
     username: string
     email?: string
@@ -32,12 +31,6 @@ function getUserInitials(username: string): string {
     .slice(0, 2)
 }
 
-/**
- * Parte client de la Navbar.
- * Recibe el usuario resuelto por el servidor — no necesita esperar al cliente
- * para saber si hay sesión, eliminando el hydration mismatch.
- * Solo se encarga de las interacciones: dropdown y logout.
- */
 export function NavbarClient({ initialUser }: NavbarClientProps) {
   const { logout } = useAuth()
 
