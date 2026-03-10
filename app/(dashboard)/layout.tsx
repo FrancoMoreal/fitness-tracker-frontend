@@ -1,13 +1,12 @@
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/session"
+import { Navbar } from "@/components/layouts/navbar"
+import { Sidebar } from "@/components/layouts/sidebar"
 
 /**
  * Layout del grupo (dashboard).
- * Primera línea de defensa server-side:
- * - Sin sesión → /login
- * - Con sesión → renderiza children
- *
- * La protección por userType (MEMBER vs TRAINER) la hace cada sub-layout.
+ * - Verifica sesión server-side → redirige a /login si no hay
+ * - Renderiza Navbar arriba + Sidebar lateral + área de contenido
  */
 export default async function DashboardLayout({
   children,
@@ -20,5 +19,24 @@ export default async function DashboardLayout({
     redirect("/login")
   }
 
-  return <>{children}</>
+  return (
+    <div className="flex min-h-screen flex-col">
+      {/* Navbar top — sticky, full width */}
+      <Navbar />
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar lateral — fijo, debajo de la navbar */}
+        <div className="hidden md:flex md:shrink-0">
+          <Sidebar />
+        </div>
+
+        {/* Área de contenido principal */}
+        <main className="flex-1 overflow-y-auto bg-muted/30">
+          <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </div>
+  )
 }
