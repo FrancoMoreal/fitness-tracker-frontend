@@ -37,20 +37,20 @@ async function buildMemberNavItems(): Promise<NavItem[]> {
   const member = await getMyMemberProfile().catch(() => null)
   const hasTrainer = member?.assignmentStatus === "ACTIVE"
 
-  const items: NavItem[] = [
-    { label: "Rutinas",          href: "/member/routines",  icon: NAV_ICONS.routines  },
-    { label: "Plan alimenticio", href: "/member/nutrition", icon: NAV_ICONS.nutrition },
-  ]
+  const items: NavItem[] = []
+
+  if (!hasTrainer) {
+    items.push({ label: "Buscar entrenador", href: "/member/trainers", icon: NAV_ICONS.members })
+  }
 
   if (hasTrainer) {
-    items.push({
-      label: "Mi entrenador",
-      href: "/member/my-trainer",
-      icon: NAV_ICONS.myTrainer,
-    })
+    items.push({ label: "Rutinas",          href: "/member/routines",  icon: NAV_ICONS.routines  })
+    items.push({ label: "Plan alimenticio", href: "/member/nutrition", icon: NAV_ICONS.nutrition })
+    items.push({ label: "Mi entrenador",    href: "/member/my-trainer", icon: NAV_ICONS.myTrainer })
   }
 
   items.push({ label: "Perfil", href: "/profile", icon: NAV_ICONS.profile })
 
   return items
+
 }
