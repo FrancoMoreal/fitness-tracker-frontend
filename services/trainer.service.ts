@@ -51,4 +51,20 @@ export async function getTrainerById(id: number): Promise<TrainerData | null> {
   } catch {
     return null
   }
+  
+}
+export async function getMyTrainerProfile(): Promise<TrainerData | null> {
+  try {
+    const response = await fetch(`${API_URL}/api/trainers/me`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(await getAuthHeader()),
+      },
+      cache: "no-store",
+    })
+    if (!response.ok) return null
+    return (await response.json()) as TrainerData
+  } catch {
+    return null
+  }
 }
