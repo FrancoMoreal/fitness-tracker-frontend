@@ -10,35 +10,64 @@ export interface MemberData {
   fullName?: string
   email?: string
   phone?: string
-  assignedTrainerId?: number
-  assignmentStatus: "NO_TRAINER" | "PENDING" | "ACTIVE" | "REJECTED" | "CANCELLED"
+  dateOfBirth?: string
   membershipStartDate?: string
   membershipEndDate?: string
   remainingDays?: number
   height?: number
   weight?: number
   isActive?: boolean
+  assignmentStatus: "NO_TRAINER" | "PENDING" | "ACTIVE" | "REJECTED" | "CANCELLED"
+  assignedTrainerId?: number
 }
 
-/**
- * Obtiene el perfil del member autenticado via /api/members/me.
- * El backend resuelve el member desde el JWT — no necesita parámetros.
- * Usado server-side en el dashboard dispatcher.
- */
+async function getAuthHeader(): Promise<Record<string, string>> {
+  const cookieStore = await cookies()
+  const token = cookieStore.get("fitness_tracker_token")?.value
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
 export async function getMyMemberProfile(): Promise<MemberData | null> {
   try {
-    const cookieStore = await cookies()
-    const token = cookieStore.get("fitness_tracker_token")?.value
-    if (!token) return null
-
     const response = await fetch(`${API_URL}/api/members/me`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        ...(await getAuthHeader()),
       },
       cache: "no-store",
     })
+    if (!response.ok) return null
+    return (await response.json()) as MemberData
+  } catch {
+    return null
+  }
+}
 
+export async function getMembersByTrainer(trainerId: number): Promise<MemberData[]> {
+  try {
+    const response = await fetch(`${API_URL}/api/members/trainer/${trainerId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(await getAuthHeader()),
+      },
+      cache: "no-store",
+    })
+    if (!response.ok) return []
+    return (await response.json()) as MemberData[]
+  } catch {
+    return []
+  }
+}
+
+export async function getMemberById(id: number): Promise<MemberData | null> {
+  try {
+    const response = await fetch(`${API_URL}/api/members/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(await getAuthHeader()),
+      },
+      cache: "no-store",
+    })
     if (!response.ok) return null
     return (await response.json()) as MemberData
   } catch {
