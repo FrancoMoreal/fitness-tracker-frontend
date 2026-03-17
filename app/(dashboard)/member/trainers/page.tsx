@@ -6,10 +6,6 @@ import { cookies } from "next/headers"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"
 
-/**
- * Obtiene la solicitud pendiente del member server-side.
- * Busca entre todas sus solicitudes la que tenga status PENDING.
- */
 async function getPendingRequest(memberId: number): Promise<AssignmentRequest | null> {
   try {
     const cookieStore = await cookies()
@@ -54,7 +50,7 @@ export default async function MemberTrainersPage() {
         </p>
       </div>
 
-      {/* Banner solicitud pendiente */}
+  
       {pendingRequest && (
         <div className="flex items-center gap-3 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-900 dark:bg-yellow-950/30 dark:text-yellow-200">
           <span className="font-medium">Solicitud pendiente</span>
@@ -66,7 +62,7 @@ export default async function MemberTrainersPage() {
         </div>
       )}
 
-      {/* Lista de trainers */}
+   
       <TrainerList
         trainers={trainers}
         memberId={member?.id ?? 0}

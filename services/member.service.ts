@@ -8,6 +8,7 @@ export interface MemberData {
   firstName: string
   lastName: string
   fullName?: string
+  email?: string
   phone?: string
   assignedTrainerId?: number
   assignmentStatus: "NO_TRAINER" | "PENDING" | "ACTIVE" | "REJECTED" | "CANCELLED"

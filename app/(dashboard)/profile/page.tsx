@@ -1,15 +1,47 @@
-export default function ProfilePage() {
-  return (
-    <div className="min-h-screen w-full bg-background">
+import { redirect } from "next/navigation"
+import { getSession } from "@/lib/session"
+import { getMyMemberProfile } from "@/services/member.service"
+import { getMyTrainerProfile } from "@/services/trainer.service"
+import { MemberProfileForm } from "@/components/profile/member-profile-form"
+import { TrainerProfileForm } from "@/components/profile/trainer.profile-form"
 
-      <main className="container px-4 py-8 sm:px-6 sm:py-10">
-        <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
-          Perfil
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Aquí podrás ver y editar tu perfil de usuario.
-        </p>
-      </main>
-    </div>
-  )
+export default async function ProfilePage() {
+  const session = await getSession()
+  if (!session) redirect("/login")
+
+  const { userType } = session
+
+  if (userType === "MEMBER") {
+    const member = await getMyMemberProfile()
+    if (!member) redirect("/login")
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Mi perfil</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Visualizá y editá tu información personal.
+          </p>
+        </div>
+        <MemberProfileForm member={member} />
+      </div>
+    )
+  }
+
+  if (userType === "TRAINER") {
+    const trainer = await getMyTrainerProfile()
+    if (!trainer) redirect("/login")
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Mi perfil</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Visualizá y editá tu información profesional.
+          </p>
+        </div>
+        <TrainerProfileForm trainer={trainer} />
+      </div>
+    )
+  }
+
+  redirect("/dashboard")
 }
