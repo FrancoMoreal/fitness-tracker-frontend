@@ -37,9 +37,9 @@ export async function getAllTrainers(): Promise<TrainerData[]> {
   }
 }
 
-export async function getTrainerById(id: number): Promise<TrainerData | null> {
+export async function getMyTrainerProfile(): Promise<TrainerData | null> {
   try {
-    const response = await fetch(`${API_URL}/api/trainers/${id}`, {
+    const response = await fetch(`${API_URL}/api/trainers/me`, {
       headers: {
         "Content-Type": "application/json",
         ...(await getAuthHeader()),
@@ -51,11 +51,11 @@ export async function getTrainerById(id: number): Promise<TrainerData | null> {
   } catch {
     return null
   }
-  
 }
-export async function getMyTrainerProfile(): Promise<TrainerData | null> {
+
+export async function getTrainerById(id: number): Promise<TrainerData | null> {
   try {
-    const response = await fetch(`${API_URL}/api/trainers/me`, {
+    const response = await fetch(`${API_URL}/api/trainers/${id}`, {
       headers: {
         "Content-Type": "application/json",
         ...(await getAuthHeader()),
