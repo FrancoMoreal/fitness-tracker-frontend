@@ -30,6 +30,7 @@ function buildTrainerNavItems(): NavItem[] {
     { label: "Rutinas",             href: "/trainer/routines",  icon: NAV_ICONS.routines  },
     { label: "Planes alimenticios", href: "/trainer/nutrition", icon: NAV_ICONS.nutrition },
     { label: "Mis ejercicios",      href: "/trainer/exercises", icon: NAV_ICONS.exercises },
+   // { label: "Configuración",       href: "/settings",          icon: NAV_ICONS.settings },
     { label: "Perfil",              href: "/profile",           icon: NAV_ICONS.profile   },
   ]
 }
@@ -49,8 +50,8 @@ async function buildMemberNavItems(): Promise<NavItem[]> {
     items.push({ label: "Plan alimenticio", href: "/member/nutrition", icon: NAV_ICONS.nutrition })
     items.push({ label: "Mi entrenador",    href: "/member/my-trainer", icon: NAV_ICONS.myTrainer })
   }
-
-  items.push({ label: "Perfil", href: "/profile", icon: NAV_ICONS.profile })
+ // items.push({ label: "Configuración",       href: "/settings",          icon: NAV_ICONS.settings })
+  items.push({ label: "Perfil",              href: "/profile",           icon: NAV_ICONS.profile })
 
   return items
 
