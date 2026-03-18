@@ -9,10 +9,10 @@ import {
   Users,
   User,
   UserCheck,
+  ClipboardList,
+  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-// ── Tipos ─────────────────────────────────────────────────────────────────────
 
 export type NavItem = {
   label: string
@@ -26,7 +26,6 @@ interface SidebarClientProps {
   userType: string
 }
 
-// ── Iconos por nombre (para serialización server → client) ────────────────────
 
 export const NAV_ICONS: Record<string, React.ReactNode> = {
   dashboard:  <LayoutDashboard className="h-4 w-4" />,
@@ -34,10 +33,11 @@ export const NAV_ICONS: Record<string, React.ReactNode> = {
   nutrition:  <Utensils className="h-4 w-4" />,
   members:    <Users className="h-4 w-4" />,
   profile:    <User className="h-4 w-4" />,
+  settings: <Settings className="h-4 w-4" />,
   myTrainer:  <UserCheck className="h-4 w-4" />,
+  exercises: <ClipboardList className="h-4 w-4" />,
 }
 
-// ── Componente ────────────────────────────────────────────────────────────────
 
 export function SidebarClient({ navItems, username, userType }: SidebarClientProps) {
   const pathname = usePathname()
