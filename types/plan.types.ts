@@ -1,6 +1,4 @@
-/**
- * Respuestas de planes de workout
- */
+
 export interface WorkoutPlanResponse {
   id: number
   name: string
@@ -14,9 +12,7 @@ export interface WorkoutPlanResponse {
   updatedAt: string
 }
 
-/**
- * Respuestas de planes nutricionales
- */
+
 export interface NutritionPlanResponse {
   id: number
   name: string
@@ -30,14 +26,9 @@ export interface NutritionPlanResponse {
   updatedAt: string
 }
 
-/**
- * Tipo unión para cualquier plan
- */
 export type PlanResponse = WorkoutPlanResponse | NutritionPlanResponse
 
-/**
- * Requestencias para crear planes
- */
+
 export interface CreateWorkoutPlanRequest {
   name: string
   description?: string
