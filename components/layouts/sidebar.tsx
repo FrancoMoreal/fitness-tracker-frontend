@@ -29,6 +29,7 @@ function buildTrainerNavItems(): NavItem[] {
     { label: "Mis miembros",        href: "/trainer/members",   icon: NAV_ICONS.members   },
     { label: "Rutinas",             href: "/trainer/routines",  icon: NAV_ICONS.routines  },
     { label: "Planes alimenticios", href: "/trainer/nutrition", icon: NAV_ICONS.nutrition },
+    { label: "Mis ejercicios",      href: "/trainer/exercises", icon: NAV_ICONS.exercises },
     { label: "Perfil",              href: "/profile",           icon: NAV_ICONS.profile   },
   ]
 }

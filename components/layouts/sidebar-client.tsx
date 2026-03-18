@@ -9,6 +9,7 @@ import {
   Users,
   User,
   UserCheck,
+  ClipboardList,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -35,6 +36,7 @@ export const NAV_ICONS: Record<string, React.ReactNode> = {
   members:    <Users className="h-4 w-4" />,
   profile:    <User className="h-4 w-4" />,
   myTrainer:  <UserCheck className="h-4 w-4" />,
+  exercises: <ClipboardList className="h-4 w-4" />,
 }
 
 // ── Componente ────────────────────────────────────────────────────────────────
