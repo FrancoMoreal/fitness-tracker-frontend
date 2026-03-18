@@ -10,11 +10,18 @@ import type { NutritionPlanData, NutritionMealData } from "@/services/nutrition.
 interface NutritionEditorClientProps {
   plan: NutritionPlanData
   trainerId: number
+  memberId: number
 }
 
-export function NutritionEditorClient({ plan, trainerId }: NutritionEditorClientProps) {
-  const { isActive, loadingAction, handleAddMeal, handleRemoveMeal, handleActivate } =
-    useNutritionEditor({ planId: plan.id, planStatus: plan.status, trainerId })
+export function NutritionEditorClient({ plan, trainerId, memberId }: NutritionEditorClientProps) {
+  const {
+    isEditable,
+    loadingAction,
+    handleAddMeal,
+    handleRemoveMeal,
+    handleActivate,
+    handleCancel,
+  } = useNutritionEditor({ planId: plan.id, planStatus: plan.status, trainerId })
 
   const [localMeals, setLocalMeals] = useState<NutritionMealData[]>(
     (plan.meals ?? []).slice().sort((a, b) => a.orderInPlan - b.orderInPlan)
@@ -23,9 +30,7 @@ export function NutritionEditorClient({ plan, trainerId }: NutritionEditorClient
   const handleAdd = async (form: Parameters<typeof handleAddMeal>[0]) => {
     const created = await handleAddMeal(form)
     if (created) {
-      setLocalMeals((prev) =>
-        [...prev, created].sort((a, b) => a.orderInPlan - b.orderInPlan)
-      )
+      setLocalMeals((prev) => [...prev, created].sort((a, b) => a.orderInPlan - b.orderInPlan))
       return created
     }
     return null
@@ -33,9 +38,7 @@ export function NutritionEditorClient({ plan, trainerId }: NutritionEditorClient
 
   const handleRemove = async (mealId: number) => {
     const success = await handleRemoveMeal(mealId)
-    if (success) {
-      setLocalMeals((prev) => prev.filter((m) => m.id !== mealId))
-    }
+    if (success) setLocalMeals((prev) => prev.filter((m) => m.id !== mealId))
   }
 
   return (
@@ -45,17 +48,18 @@ export function NutritionEditorClient({ plan, trainerId }: NutritionEditorClient
         description={plan.description}
         memberName={plan.memberName}
         status={plan.status}
-        memberId={plan.memberId}
+        memberId={memberId}
         isActivating={loadingAction === "activate"}
+        isCancelling={loadingAction === "cancel"}
         canActivate={localMeals.length > 0}
         onActivate={handleActivate}
+        onCancel={handleCancel}
       />
 
-      {/* Lista de comidas */}
       <div className="space-y-2">
         {localMeals.length === 0 ? (
           <p className="rounded-lg border border-dashed py-8 text-center text-sm text-muted-foreground">
-            Sin comidas cargadas. Agregá una para empezar.
+            Sin comidas. Agregá una para empezar.
           </p>
         ) : (
           localMeals.map((meal, idx) => (
@@ -63,7 +67,7 @@ export function NutritionEditorClient({ plan, trainerId }: NutritionEditorClient
               key={meal.id}
               meal={meal}
               index={idx}
-              isReadOnly={isActive}
+              isReadOnly={!isEditable}
               isRemoving={loadingAction === `remove-meal-${meal.id}`}
               onRemove={handleRemove}
             />
@@ -71,8 +75,7 @@ export function NutritionEditorClient({ plan, trainerId }: NutritionEditorClient
         )}
       </div>
 
-      {/* Agregar comida */}
-      {!isActive && (
+      {isEditable && (
         <AddMealForm
           nextOrder={localMeals.length + 1}
           isLoading={loadingAction === "add-meal"}

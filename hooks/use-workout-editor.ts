@@ -32,7 +32,9 @@ export function useWorkoutEditor({ plan, trainerId }: UseWorkoutEditorProps) {
   const [isPending, startTransition] = useTransition()
   const [loadingAction, setLoadingAction] = useState<string | null>(null)
 
-  const isActive = plan.status === "ACTIVE"
+  const isActive    = plan.status === "ACTIVE"
+  const isDraft     = plan.status === "DRAFT"
+  const isEditable  = isActive || isDraft
 
   const handleAddDay = async (form: AddDayForm) => {
     if (!form.dayName.trim()) {
@@ -43,11 +45,7 @@ export function useWorkoutEditor({ plan, trainerId }: UseWorkoutEditorProps) {
     try {
       const response = await api.post(
         `/api/workout-plans/${plan.id}/days?trainerId=${trainerId}`,
-        {
-          dayName:   form.dayName.trim(),
-          dayNumber: form.dayNumber,
-          notes:     form.notes.trim() || undefined,
-        }
+        { dayName: form.dayName.trim(), dayNumber: form.dayNumber, notes: form.notes.trim() || undefined }
       )
       if (!response.success) {
         toast.error("Error al agregar día", { description: response.error })
@@ -64,11 +62,7 @@ export function useWorkoutEditor({ plan, trainerId }: UseWorkoutEditorProps) {
     }
   }
 
-  // Devuelve el WorkoutExerciseData creado o null si falla
-  const handleAddExercise = async (
-    dayId: number,
-    form: AddExerciseForm
-  ): Promise<WorkoutExerciseData | null> => {
+  const handleAddExercise = async (dayId: number, form: AddExerciseForm): Promise<WorkoutExerciseData | null> => {
     setLoadingAction(`add-exercise-${dayId}`)
     try {
       const response = await api.post<WorkoutExerciseData>(
@@ -83,7 +77,6 @@ export function useWorkoutEditor({ plan, trainerId }: UseWorkoutEditorProps) {
           notes:          form.notes.trim() || undefined,
         }
       )
-
       if (!response.success || !response.data) {
         toast.error("Error al agregar ejercicio", { description: response.error })
         return null
@@ -121,16 +114,29 @@ export function useWorkoutEditor({ plan, trainerId }: UseWorkoutEditorProps) {
   const handleActivate = async () => {
     setLoadingAction("activate")
     try {
-      const response = await api.post(
-        `/api/workout-plans/${plan.id}/activate?trainerId=${trainerId}`
-      )
+      const response = await api.post(`/api/workout-plans/${plan.id}/activate?trainerId=${trainerId}`)
       if (!response.success) {
         toast.error("Error al activar plan", { description: response.error })
         return
       }
-      toast.success("Plan activado", {
-        description: "El miembro ya puede ver su plan de workout.",
-      })
+      toast.success("Plan activado", { description: "El miembro ya puede ver su plan de workout." })
+      startTransition(() => router.refresh())
+    } catch {
+      toast.error("Error de conexión")
+    } finally {
+      setLoadingAction(null)
+    }
+  }
+
+  const handleCancel = async () => {
+    setLoadingAction("cancel")
+    try {
+      const response = await api.post(`/api/workout-plans/${plan.id}/cancel?trainerId=${trainerId}`)
+      if (!response.success) {
+        toast.error("Error al cancelar plan", { description: response.error })
+        return
+      }
+      toast.success("Plan cancelado")
       startTransition(() => router.refresh())
     } catch {
       toast.error("Error de conexión")
@@ -141,11 +147,14 @@ export function useWorkoutEditor({ plan, trainerId }: UseWorkoutEditorProps) {
 
   return {
     isActive,
+    isDraft,
+    isEditable,
     isPending,
     loadingAction,
     handleAddDay,
     handleAddExercise,
     handleRemoveExercise,
     handleActivate,
+    handleCancel,
   }
 }

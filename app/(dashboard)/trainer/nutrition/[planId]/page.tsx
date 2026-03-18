@@ -42,5 +42,10 @@ export default async function NutritionPlanEditorPage({ params }: NutritionPlanE
   if (!plan || !trainer) notFound()
   if (plan.trainerId !== trainer.id) notFound()
 
-  return <NutritionEditorClient plan={plan} trainerId={trainer.id} />
-}
+ return (
+  <NutritionEditorClient
+    plan={plan}
+    trainerId={trainer.id}
+    memberId={plan.memberId} 
+  />
+)}
