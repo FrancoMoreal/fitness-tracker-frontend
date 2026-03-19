@@ -43,5 +43,5 @@ export default async function ProfilePage() {
     )
   }
 
-  redirect("/dashboard")
+redirect("/admin")
 }
