@@ -61,10 +61,9 @@ export function LoginForm() {
         role: authData.user.role,
       })
 
-      // login() actualiza el contexto
       login(authData.user)
 
-      router.push(Paths.HOME)
+      router.push(Paths.DASHBOARD)
 
     } catch (err) {
       console.error(err)

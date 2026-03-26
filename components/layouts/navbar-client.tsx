@@ -52,6 +52,10 @@ export function NavbarClient({ initialUser }: NavbarClientProps) {
   }
 
   return (
+      <div className="flex items-center gap-2">
+    <Button asChild variant="ghost" size="sm" className="h-9 px-4">
+      <Link href="/dashboard">Dashboard</Link>
+    </Button>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -98,5 +102,6 @@ export function NavbarClient({ initialUser }: NavbarClientProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+      </div>
   )
 }

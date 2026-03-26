@@ -1,41 +1,30 @@
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/session"
 import { getMyMemberProfile } from "@/services/member.service"
+import { getMyTrainerProfile } from "@/services/trainer.service"
+import { getMemberDashboardStats, getTrainerDashboardStats } from "@/services/dashboard.service"
+import { MemberDashboard } from "@/components/dashboard/member-dashboard"
+import { TrainerDashboard } from "@/components/dashboard/trainer-dashboard"
 
-/**
- * Dashboard dispatcher — nunca renderiza contenido propio.
- * Lee el userType del JWT y redirige al área correcta.
- *
- * TRAINER  → /trainer/members
- * MEMBER   → /member/routines     (si tiene trainer ACTIVE)
- *          → /member/trainers     (si NO tiene trainer)
- */
 export default async function DashboardPage() {
   const session = await getSession()
+  if (!session) redirect("/login")
 
-  // El layout ya redirige si no hay sesión, pero lo dejamos como
-  // segunda línea de defensa por si se accede directamente
-  if (!session) {
-    redirect("/login")
-  }
+  const { userType } = session
 
-  if (session.userType === "TRAINER") {
-    redirect("/trainer/members")
-  }
-
-  if (session.userType === "MEMBER") {
-    // Consultamos el perfil del member para ver su assignmentStatus
+  if (userType === "MEMBER") {
     const member = await getMyMemberProfile()
-
-    // Si el fetch falla o el member no existe, mandamos a la lista de trainers
-    if (!member) {
-      redirect("/member/trainers")
-    }
-
-    const hasActiveTrainer = member.assignmentStatus === "ACTIVE"
-    redirect(hasActiveTrainer ? "/member/routines" : "/member/trainers")
+    if (!member) redirect("/login")
+    const stats = await getMemberDashboardStats(member.id)
+    return <MemberDashboard member={member} stats={stats} />
   }
 
-  // Fallback por si el userType es inesperado
+  if (userType === "TRAINER") {
+    const trainer = await getMyTrainerProfile()
+    if (!trainer) redirect("/login")
+    const stats = await getTrainerDashboardStats(trainer.id)
+    return <TrainerDashboard trainer={trainer} stats={stats} />
+  }
+
   redirect("/login")
 }
