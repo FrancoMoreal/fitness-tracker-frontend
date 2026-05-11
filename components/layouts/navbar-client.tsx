@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User, Settings, LogOut } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
-
+import { ThemeToggle } from "@/components/theme-toggle"
 interface NavbarClientProps {
   initialUser: {
     username: string
@@ -37,6 +37,7 @@ export function NavbarClient({ initialUser }: NavbarClientProps) {
   if (!initialUser) {
     return (
       <div className="flex items-center gap-2">
+         <ThemeToggle />
         <Link href="/login">
           <Button variant="ghost" size="sm" className="h-9 px-4">
             Iniciar sesión
@@ -52,6 +53,11 @@ export function NavbarClient({ initialUser }: NavbarClientProps) {
   }
 
   return (
+      <div className="flex items-center gap-2">
+         <ThemeToggle />
+    <Button asChild variant="ghost" size="sm" className="h-9 px-4">
+      <Link href="/dashboard">Dashboard</Link>
+    </Button>
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
@@ -98,5 +104,6 @@ export function NavbarClient({ initialUser }: NavbarClientProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+      </div>
   )
 }

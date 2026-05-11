@@ -11,6 +11,7 @@ import {
   UserCheck,
   ClipboardList,
   Settings,
+  History
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,9 +34,10 @@ export const NAV_ICONS: Record<string, React.ReactNode> = {
   nutrition:  <Utensils className="h-4 w-4" />,
   members:    <Users className="h-4 w-4" />,
   profile:    <User className="h-4 w-4" />,
-  settings: <Settings className="h-4 w-4" />,
+  settings:   <Settings className="h-4 w-4" />,
   myTrainer:  <UserCheck className="h-4 w-4" />,
-  exercises: <ClipboardList className="h-4 w-4" />,
+  exercises:  <ClipboardList className="h-4 w-4" />,
+  history:    <History className="h-4 w-4" />,
 }
 
 

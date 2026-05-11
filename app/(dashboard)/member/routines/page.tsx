@@ -12,11 +12,10 @@ export default async function MemberRoutinesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold">Mis rutinas</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Tus planes de entrenamiento activos asignados por tu entrenador.
+          Tus planes de entrenamiento activos. Completá cada día para registrar tu progreso.
         </p>
       </div>
 
@@ -40,7 +39,7 @@ export default async function MemberRoutinesPage() {
       ) : (
         <div className="space-y-6">
           {plans.map((plan) => (
-            <WorkoutPlanCard key={plan.id} plan={plan} />
+            <WorkoutPlanCard key={plan.id} plan={plan} memberId={member!.id} />
           ))}
         </div>
       )}

@@ -46,9 +46,10 @@ async function buildMemberNavItems(): Promise<NavItem[]> {
   }
 
   if (hasTrainer) {
-    items.push({ label: "Rutinas",          href: "/member/routines",  icon: NAV_ICONS.routines  })
-    items.push({ label: "Plan alimenticio", href: "/member/nutrition", icon: NAV_ICONS.nutrition })
+    items.push({ label: "Rutinas",          href: "/member/routines",   icon: NAV_ICONS.routines  })
+    items.push({ label: "Plan alimenticio", href: "/member/nutrition",  icon: NAV_ICONS.nutrition })
     items.push({ label: "Mi entrenador",    href: "/member/my-trainer", icon: NAV_ICONS.myTrainer })
+    items.push({ label: "Historial",        href: "/member/history",    icon: NAV_ICONS.history })
   }
  // items.push({ label: "Configuración",       href: "/settings",          icon: NAV_ICONS.settings })
   items.push({ label: "Perfil",              href: "/profile",           icon: NAV_ICONS.profile })

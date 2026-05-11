@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 const COOKIE_NAME = "fitness_tracker_token"
 
 // Rutas que no requieren autenticación
-const PUBLIC_PATHS = ["/login", "/register"]
+const PUBLIC_PATHS = ["/login", "/register", "/welcome", "/"]
 
 
 const MEMBER_PREFIX  = "/member"
@@ -31,11 +31,12 @@ function isTokenExpired(payload: Record<string, unknown>): boolean {
   return Date.now() >= payload.exp * 1000
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-
+console.log("middleware pathname:", pathname)
   // Dejar pasar rutas públicas sin ninguna verificación
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p))
+  const isPublic = PUBLIC_PATHS.some((p) => p === "/" ? pathname === "/" : pathname.startsWith(p))
+  console.log("isPublic:", isPublic)
   if (isPublic) return NextResponse.next()
 
   // Leer la cookie HttpOnly
@@ -71,8 +72,6 @@ export function middleware(request: NextRequest) {
   return NextResponse.next()
 }
 
-
- // Definir en qué rutas actúa el middleware.
 
 export const config = {
   matcher: [
